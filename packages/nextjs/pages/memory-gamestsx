@@ -1,0 +1,95 @@
+import { useEffect, useState } from "react";
+import SingleCard from "../components/memorygame/SingleCard";
+import Message from "~~/components/memorygame/chat/message";
+import Player from "~~/components/memorygame/profile/player";
+
+const cardImages = [
+  { src: "/img/holiday.png", matched: false },
+  { src: "/img/cold.png", matched: false },
+  { src: "/img/warm-1.png", matched: false },
+
+  { src: "/img/cold-2.png", matched: false },
+  { src: "/img/warm.png", matched: false },
+  { src: "/img/white.png", matched: false },
+  { src: "/img/patterned.png", matched: false },
+  { src: "/img/black.png", matched: false },
+];
+export interface ICard {
+  id: number;
+  src: string;
+  matched: boolean;
+}
+
+const MemoryGame = () => {
+  const [cards, setCards] = useState<ICard[]>([]); //
+  const [turns, setTurns] = useState(0); //
+  const [choiceOne, setChoiceOne] = useState<ICard | null>(null); //
+  const [choiceTwo, setChoiceTwo] = useState<ICard | null>(null); //
+  const [disabled, setDisabled] = useState(false); //
+  //shuffle cards
+  const shuffleCards = () => {
+    const shuffledCards = [...cardImages, ...cardImages]
+      .sort(() => Math.random() - 0.5)
+      .map(card => ({ ...card, id: Math.random() }));
+
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setCards(shuffledCards);
+    setTurns(0);
+  };
+  useEffect(() => {}, [choiceTwo]);
+  //handle a choice
+
+  const handleChoice = (card: ICard) => {
+    choiceOne ? setChoiceTwo(card) : setChoiceOne(card);
+  };
+
+  //compare two selected cards
+  useEffect(() => {
+    if (choiceOne && choiceTwo) {
+      setDisabled(true);
+      if (choiceOne.src === choiceTwo.src) {
+        setCards(prevState => prevState.map(card => (card.src === choiceOne.src ? { ...card, matched: true } : card)));
+
+        restTurn();
+      } else {
+        setTimeout(restTurn, 1000);
+      }
+    }
+  }, [choiceOne, choiceTwo]);
+  //rest choice & increase turn
+  const restTurn = () => {
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setTurns(prevState => prevState + 1);
+    setDisabled(false);
+  };
+
+  useEffect(() => {
+    shuffleCards();
+  }, []);
+  return (
+    <div className="flex items-center justify-center flex-col mt-8">
+      <h1>One Pair</h1>
+      <button onClick={shuffleCards}>New Game</button>
+      <div className="memory__game-layout max-w-[90%] mt-6">
+        <Player />
+        <div className="grid grid-cols-4 gap-4 ">
+          {cards.map(card => (
+            <SingleCard
+              flipped={card === choiceOne || card === choiceTwo || card.matched}
+              handleChoice={handleChoice}
+              key={card.id}
+              card={card}
+              disabled={disabled}
+            />
+          ))}
+        </div>
+        <Message />
+      </div>
+      <p>Turns {turns}</p>
+    </div>
+  );
+};
+
+export default MemoryGame;

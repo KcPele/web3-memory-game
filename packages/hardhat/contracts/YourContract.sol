@@ -42,7 +42,7 @@ contract YourContract {
      *
      * @param _newGreeting (string memory) - new greeting to save on the contract
      */
-    function setGreeting(string memory _newGreeting) public payable {
+    function setGreeting(string memory _newGreeting) public payable returns(string memory ) {
         // Print data to the hardhat chain console. Remove when deploying to a live network.
         console.log("Setting new greeting '%s' from %s",  _newGreeting, msg.sender);
 
@@ -60,6 +60,7 @@ contract YourContract {
 
         // emit: keyword used to trigger an event
         emit GreetingChange(msg.sender, _newGreeting, msg.value > 0, 0);
+        return _newGreeting;
     }
 
     /**

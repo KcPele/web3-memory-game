@@ -14,10 +14,24 @@ export const ContractInteraction = () => {
     functionName: "setGreeting",
     args: [newGreeting],
     value: "0.01",
+
+    onSuccess: async data => {
+      const tx = await data.wait();
+      console.log(convertHexToString(tx.logs[0].data));
+    },
     onBlockConfirmation: txnReceipt => {
       console.log("📦 Transaction blockHash", txnReceipt.blockHash);
     },
   });
+
+  function convertHexToString(hexString: string) {
+    const hex = hexString.toString(); //force conversion
+    let str = "";
+    for (let i = 0; i < hex.length; i += 2) {
+      str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return str;
+  }
 
   return (
     <div className="flex bg-base-300 relative pb-10">
