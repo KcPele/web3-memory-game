@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         MemoryGame: {
-          address: "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+          address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
           abi: [
             {
               inputs: [],
@@ -41,6 +41,56 @@ const contracts = {
                 },
               ],
               name: "CardFlipped",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "player",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "gameId",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "cardId",
+                  type: "uint256",
+                },
+              ],
+              name: "CardMatched",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "player",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "gameId",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "cardId",
+                  type: "uint256",
+                },
+              ],
+              name: "CardSelected",
               type: "event",
             },
             {
@@ -135,6 +185,25 @@ const contracts = {
               anonymous: false,
               inputs: [
                 {
+                  indexed: true,
+                  internalType: "address",
+                  name: "player",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "gameId",
+                  type: "uint256",
+                },
+              ],
+              name: "GameReset",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
                   indexed: false,
                   internalType: "uint256",
                   name: "gameId",
@@ -149,6 +218,19 @@ const contracts = {
               ],
               name: "GameStarted",
               type: "event",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_gameId",
+                  type: "uint256",
+                },
+              ],
+              name: "_checkWinner",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
             },
             {
               inputs: [
@@ -423,10 +505,23 @@ const contracts = {
               stateMutability: "nonpayable",
               type: "function",
             },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_gameId",
+                  type: "uint256",
+                },
+              ],
+              name: "resetGame",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
           ],
         },
         YourContract: {
-          address: "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
+          address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
           abi: [
             {
               inputs: [

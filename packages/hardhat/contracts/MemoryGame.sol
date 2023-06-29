@@ -46,9 +46,12 @@ contract MemoryGame {
   //event
   event GameCreated(address indexed creator, uint gameId, GameLevel gameLevel);
   event GameJoined(address indexed player, uint gameId, string playerName);
-  event GameStarted(uint gameId, uint playerInGameCount);
+  event GameStarted(uint playerInGameCount, uint gameId);
   event GameFinished(address indexed winner, uint gameId);
   event GameCancelled(address indexed player, uint gameId);
+  event GameReset(address indexed player, uint gameId);
+  event CardSelected(address indexed player, uint gameId, uint cardId);
+  event CardMatched(address indexed player, uint gameId, uint cardId);
   event CardFlipped(address indexed player, uint gameId, bool player1State, bool player2State);
 
   /// @dev internal function to generate random number; used for shulling the cards and selecting a random card
@@ -65,8 +68,8 @@ contract MemoryGame {
   }
 
   //shuffle cards
-  function _shuffleAndDuplicateCards(Card[] memory inputCards) internal {
-    Card[] memory shuffledCards = new Card[](inputCards.length * 2);
+  function _shuffleAndDuplicateCards(uint256 gameId, uint256 _level, Card[] memory inputCards) internal {
+    Card[] memory shuffledCards = new Card[](inputCards.length * _level);
 
     for (uint256 i = 0; i < inputCards.length; i++) {
       shuffledCards[i] = inputCards[i];
@@ -86,7 +89,7 @@ contract MemoryGame {
     }
 
     for (uint256 i = 0; i < shuffledCards.length; ) {
-      gameCards[gameCount].push(shuffledCards[i]);
+      gameCards[gameId].push(shuffledCards[i]);
       unchecked {
         i++;
       }
@@ -95,11 +98,16 @@ contract MemoryGame {
 
   //function that creates a game
   function createGame(GameLevel _gameLevel, Card[] memory _gameCards, uint256 _price) public payable {
+    //change the game id to hash
+    //change the card id to hash
+
     if (_price < msg.value) {
       revert MemoryGame__ValueNotEqaultToPrice();
     }
     //shuffle cards
-    _shuffleAndDuplicateCards(_gameCards);
+    uint256 gameId = gameCount;
+    //hard coded the level to 2 for now
+    _shuffleAndDuplicateCards(gameId, 2, _gameCards);
 
     //create a game
     Game memory game;
@@ -203,7 +211,7 @@ contract MemoryGame {
       for (uint256 i = 0; i < cards.length; i++) {
         if (cards[i].id == cardOne.id) {
           cards[i].matched = true;
-          console.log(cardOne.id, cardTwo.id, cards[i].id);
+          emit CardMatched(msg.sender, _gameId, cardOne.id);
         }
       }
       if (game.player1.playerAddress == msg.sender) {
@@ -227,13 +235,38 @@ contract MemoryGame {
       // Reset the player states for the next turn
       game.player1.state = false;
       game.player2.state = false;
-
-      // Check if the two flipped card IDs match
-
-      // Add logic to determine the next turn or end the game if all moves are made
+    }
+    //check if all cards have been matched
+    bool allMatched = false;
+    for (uint256 i = 0; i < cards.length; i++) {
+      if (!cards[i].matched) {
+        allMatched = false;
+        break;
+      }
+      allMatched = true;
+    }
+    if (allMatched) {
+      game.gameFinished = true;
+      _checkWinner(_gameId);
+      emit GameFinished(game.winner, _gameId);
     }
 
     emit CardFlipped(msg.sender, _gameId, game.player1.state, game.player2.state);
+  }
+
+  //check for the winner and end the game
+  function _checkWinner(uint256 _gameId) public {
+    Game storage game = gameStore[_gameId];
+    require(game.gameStarted, "Game has not started");
+    // require(!game.gameFinished, "Game has already finished");
+
+    if (game.player1.score > game.player2.score) {
+      game.winner = game.player1.playerAddress;
+    } else if (game.player1.score < game.player2.score) {
+      game.winner = game.player2.playerAddress;
+    } else {
+      game.winner = address(0);
+    }
   }
 
   function endGame(uint256 _gameId) public gameExists(_gameId) onlyGamePlayer(_gameId) gameNotCancelled(_gameId) {
@@ -242,6 +275,7 @@ contract MemoryGame {
     require(!game.gameFinished, "Game has already finished");
 
     game.gameFinished = true;
+
     // Add logic to determine the winner and update game state
 
     emit GameFinished(game.winner, _gameId);
@@ -250,8 +284,37 @@ contract MemoryGame {
   function cancelGame(
     uint256 _gameId
   ) public gameExists(_gameId) onlyGameCreator(_gameId) gameNotStarted(_gameId) gameNotFinished(_gameId) {
+    //send back the price to the game creator
+    Game storage game = gameStore[_gameId];
+    (bool sent, ) = payable(game.player1.playerAddress).call{value: game.price}("");
+    require(sent, "Failed to send Ether");
     delete gameStore[_gameId];
     emit GameCancelled(msg.sender, _gameId);
+  }
+
+  //reset the game whichs resets the game state and the cards and reshuflles the cards
+  function resetGame(uint256 _gameId) public gameExists(_gameId) onlyGameCreator(_gameId) {
+    Game storage game = gameStore[_gameId];
+    require(game.gameFinished, "Game has not finished");
+    game.gameFinished = false;
+    game.player1.state = false;
+    game.player2.state = false;
+    game.player1.score = 0;
+    game.player2.score = 0;
+    game.winner = address(0);
+    Card[] storage cards = gameCards[_gameId];
+    for (uint256 i = 0; i < cards.length; i++) {
+      cards[i].matched = false;
+    }
+
+    //shuffle the cards
+    for (uint256 i = 0; i < cards.length; i++) {
+      uint256 rand = _createRandomNum((cards.length - i), msg.sender);
+      Card memory temp = cards[rand];
+      cards[rand] = cards[i];
+      cards[i] = temp;
+    }
+    emit GameReset(msg.sender, _gameId);
   }
 
   //getter functions

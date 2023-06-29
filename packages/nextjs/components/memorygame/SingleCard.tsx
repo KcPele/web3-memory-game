@@ -17,7 +17,7 @@ const SingleCard = ({
     handleChoice(card);
   };
   return (
-    <div className="relative max-w-[100px] card" key={card.id}>
+    <div className="relative max-w-[100px] card">
       <div className={flipped ? "flipped" : ""}>
         <img className="front w-full block border-2 border-white rounded " src={card.src} alt="card front" />
         <img
