@@ -33,8 +33,10 @@ p {
 
 .memory__game-layout {
   display: grid;
+  width: 100%;
   grid-template-columns: 1fr 2fr 1fr;
   gap: 1em;
+  justify-content: space-around;
 }
 @media screen and (max-width: 868px) {
   .memory__game-layout {

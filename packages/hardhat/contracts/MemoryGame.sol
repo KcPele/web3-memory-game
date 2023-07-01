@@ -121,7 +121,7 @@ contract MemoryGame {
     game.winner = address(0);
 
     //emit event
-    emit GameCreated(msg.sender, gameCount, _gameLevel);
+    emit GameCreated(msg.sender, gameId, _gameLevel);
     //add game to mapping
     gameStore[gameCount] = game;
     //increment game count

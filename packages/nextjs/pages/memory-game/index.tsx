@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { BigNumber, ethers } from "ethers";
-import { useScaffoldContract, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
 
 const cards = [
   { src: "/assets/socks/holiday.png", matched: false, id: BigNumber.from(1) },
@@ -50,32 +50,47 @@ const MemoryGame = () => {
 
   useEffect(() => {
     if (gameId) {
-      router.push(`/memory-game/${gameId}`);
+      // router.push(`/memory-game/${gameId}`);
     }
   }, [redirect, gameId]);
+
+  //events emitted in the game
+  useScaffoldEventSubscriber({
+    contractName: "MemoryGame",
+    eventName: "GameCreated",
+    listener(...args) {
+      console.log(args[1].toString());
+      router.push(`/memory-game/${args[1].toString()}`);
+    },
+  });
   return (
-    <div className=" flex items-center flex-col justify-center">
-      <h1 className="text-4xl">Ultimate flip sock game</h1>
-      <div className="max-w-[500px]">
-        <p>Create Your Game</p>
-        <div>
-          <p>Game Level</p>
-          <input
-            type="number"
-            placeholder="game level 0-2"
-            className="border-primary py-2 rounded-full bg-transparent border-2 font-bai-jamjuree w-full px-4    "
-            onChange={e => setLevel(Number(e.target.value))}
-          />
-        </div>
-        {/* <div>
+    <div className="mt-20 h-full grid grid-cols-2 justify-center items-center gap-4">
+      <div className=" flex justify-center items-center  w-full">
+        <img className="max-w-[50%] rounded-md w-full" src="/assets/socks/patterned.png" alt="socks" />
+      </div>
+      <div>
+        <h1 className="text-4xl">Ultimate flip sock game</h1>
+        <div className="max-w-[500px]">
+          <p>Create Your Game</p>
+          <div>
+            <p>Game Level</p>
+            <input
+              type="number"
+              placeholder="game level 0-2"
+              className="border-primary py-2 rounded-full bg-transparent border-2 font-bai-jamjuree w-full px-4    "
+              onChange={e => setLevel(Number(e.target.value))}
+            />
+          </div>
+          {/* <div>
          price  
           <p>Price</p>
           <IntegerInput value={price} onChange={val => setPrice(val as BigNumber)} />
         </div> */}
-        <div className="mt-5">
-          <button className="border-2 w-full p-2 rounded-full" onClick={handleGameCreation}>
-            Create Game
-          </button>
+          <div className="mt-5">
+            <button className="border-2 w-full p-2 rounded-full" onClick={handleGameCreation}>
+              Create Game
+            </button>
+          </div>
         </div>
       </div>
     </div>

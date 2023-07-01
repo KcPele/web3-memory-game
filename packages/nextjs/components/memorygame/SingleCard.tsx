@@ -13,11 +13,12 @@ const SingleCard = ({
   disabled: boolean;
 }) => {
   const handleClick = () => {
+    console.log("disabled", disabled);
     if (disabled) return;
     handleChoice(card);
   };
   return (
-    <div className="relative max-w-[100px] card">
+    <div className="relative max-w-[100%] card">
       <div className={flipped ? "flipped" : ""}>
         <img className="front w-full block border-2 border-white rounded " src={card.src} alt="card front" />
         <img
