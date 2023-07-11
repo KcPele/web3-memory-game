@@ -18,7 +18,7 @@ const MemoryGame = () => {
   const router = useRouter();
   const { address } = useAccount();
   const level = 0;
-  const [price, setPrice] = useState(ethers.utils.parseEther("0.01"));
+  const [price, setPrice] = useState(ethers.utils.parseEther("0.001"));
   const [gameId, setGameId] = useState<number | null>(null);
   const [redirect, setRedirect] = useState(false);
   const { data: memoryGame } = useScaffoldContract({
@@ -44,14 +44,18 @@ const MemoryGame = () => {
     },
   });
   const handleGameCreation = async () => {
-    console.log(isLoading);
-    setPrice(ethers.utils.parseEther("0.01"));
-    const currentGameId = (await memoryGame?.gameCount()) as BigNumber;
-    console.log(currentGameId);
-    setGameId(currentGameId.toNumber());
-    createGame();
+    try {
+      console.log(isLoading);
+      setPrice(ethers.utils.parseEther("0.01"));
+      const currentGameId = (await memoryGame?.gameCount()) as BigNumber;
+      console.log(currentGameId);
+      setGameId(currentGameId.toNumber());
+      createGame();
 
-    console.log(isLoading);
+      console.log(isLoading);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
