@@ -15,7 +15,7 @@ const Message = ({ gameId }: { gameId: string }) => {
 
   useEffect(() => {
     socketInitializer();
-  }, []);
+  }, [address]);
 
   const socketInitializer = async () => {
     // We just call it because we don't need anything else out of it

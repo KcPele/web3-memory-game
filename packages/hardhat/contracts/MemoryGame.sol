@@ -2,11 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 //memory flip card game contract
 
 error MemoryGame__ValueNotEqaultToPrice();
 
-contract MemoryGame {
+contract MemoryGame is ERC721 {
   //game levels
   enum GameLevel {
     Easy,
@@ -53,6 +54,8 @@ contract MemoryGame {
   event CardSelected(address indexed player, uint gameId, uint cardId);
   event CardMatched(address indexed player, uint gameId, uint cardId);
   event CardFlipped(address indexed player, uint gameId, bool player1State, bool player2State);
+
+  constructor() ERC721("MemoryGame", "MG") {}
 
   /// @dev internal function to generate random number; used for shulling the cards and selecting a random card
   ///@dev the random number is generated using the block difficulty, timestamp and the sender's address which will be  changed to use chainlink VRF

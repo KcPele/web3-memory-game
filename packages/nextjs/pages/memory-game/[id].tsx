@@ -43,6 +43,9 @@ const MemoryGamePlayGround = () => {
   const [winner, setWinner] = useState(addressZero); //
 
   //web3 intergration
+  const config = {
+    gasLimit: 1000000,
+  };
 
   const [playerOne, setPlayerOne] = useState<IPlayer>({
     playerAddress: "",
@@ -71,6 +74,7 @@ const MemoryGamePlayGround = () => {
 
   //
   const { writeAsync: makeMove } = useScaffoldContractWrite({
+    ...config,
     contractName: "MemoryGame",
     functionName: "makeMove",
     args: [gameId, (choiceOne as ICard).id, (choiceTwo as ICard).id],
@@ -87,9 +91,10 @@ const MemoryGamePlayGround = () => {
 
   //reseting the game
   const { writeAsync: resetGame } = useScaffoldContractWrite({
+    ...config,
     contractName: "MemoryGame",
     functionName: "resetGame",
-    args: [gameId],
+    args: [gameId] as [BigNumber],
     onSuccess: async data => {
       const res = await data.wait();
       console.log(res);
@@ -102,6 +107,7 @@ const MemoryGamePlayGround = () => {
 
   //player two joing the game
   const { writeAsync: joinGame } = useScaffoldContractWrite({
+    ...config,
     contractName: "MemoryGame",
     functionName: "joinGame",
     args: [gameId],
